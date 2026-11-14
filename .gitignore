@@ -1,0 +1,34 @@
+# 运行时状态与日志：每次安装/运行都会变化
+explorer-redirect-log.txt
+wechat-redirect-log.txt
+redirector-status.txt
+redirector-selftest.txt
+install-log-*.txt
+restore-log-*.txt
+
+# 安装/还原产生的备份与快照（含本机注册表与 Everything 配置状态）
+backup/
+
+# 构建产物：从源码用 build.cmd 生成，不进入仓库
+*.exe
+*.pdb
+*.dll
+bin/
+obj/
+.vs/
+
+# 本机兼容入口：公开仓库只保留“全局转交-*.cmd”
+微信转交-*.cmd
+
+# 已移到仓库外私有目录的本机研究记录
+微信无闪方案-研究记录.md
+
+# Claude Code 的本机项目设置
+.claude/
+
+# 临时文件与系统文件
+*.tmp
+~$*
+Thumbs.db
+desktop.ini
+.DS_Store
