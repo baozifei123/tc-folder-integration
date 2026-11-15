@@ -9,13 +9,17 @@ restore-log-*.txt
 # 安装/还原产生的备份与快照（含本机注册表与 Everything 配置状态）
 backup/
 
-# 构建产物：从源码用 build.cmd 生成，不进入仓库
+# 构建产物：从源码生成，不进入仓库
+dist/
 *.exe
 *.pdb
 *.dll
 bin/
 obj/
 .vs/
+
+# 本机选择的 Total Commander 路径
+tc-path.txt
 
 # 本机兼容入口：公开仓库只保留“全局转交-*.cmd”
 微信转交-*.cmd

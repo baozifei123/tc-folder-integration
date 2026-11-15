@@ -11,6 +11,18 @@
 - 不替换 `explorer.exe`，不全局劫持 Win+E；
 - 提供一键安装、暂停和一键卸载。
 
+## 发行版与路径配置
+
+仓库同时提供脚本入口和单文件管理器 `TC-Folder-Integration.exe`。管理器把内嵌的脚本、转交器和 CMD 入口释放到固定目录：
+
+```text
+%LOCALAPPDATA%\TCFolderIntegration\
+```
+
+选择这个固定目录而不是临时目录，是为了让“还原默认文件夹关联”始终能找到安装时写入 `backup\` 的备份和 `active-v2.txt` 指针。管理器只更新自己的程序文件；升级时不会覆盖 `backup\`、`redirector-*.txt` 或 `tc-path.txt`。如果目标目录已存在且不是本程序创建的（没有 `.tc-folder-integration` 标记），管理器会停止，不覆盖其中任何文件。
+
+TC 路径由程序目录中的 `tc-path.txt` 配置；没有该文件时使用默认路径 `%LOCALAPPDATA%\TotalCMD64\TotalCMD64.exe`。`TC-Core.ps1` 和转交器读取同一个文件名，因此管理器中选择的路径对两部分都生效。修改路径后，已运行的转交器需要重新启动才会使用新路径。
+
 ## 工作流程
 
 1. 以当前用户权限启动，安装 `SetWinEventHook(EVENT_OBJECT_SHOW, WINEVENT_OUTOFCONTEXT)`。
@@ -53,6 +65,8 @@
 ## 相关文件
 
 - `TCWeChatRedirector.cs`：转交器源码
-- `build.cmd`：使用 Windows 自带的 .NET Framework 4.x `csc.exe` 编译
+- `TC-Folder-Integration.cs`：单文件管理器，内嵌脚本、转交器和 CMD 入口
+- `build.cmd`：使用 Windows 自带的 .NET Framework 4.x `csc.exe` 编译转交器
+- `build-release.ps1`：构建单文件发行版并运行隔离测试与打包自检
 - `全局转交-安装.cmd` / `全局转交-卸载.cmd` / `全局转交-状态.cmd`：入口
 - `TC-Core.ps1` / `TC-Manager.ps1`：TC/Everything 文件夹关联的安装与还原

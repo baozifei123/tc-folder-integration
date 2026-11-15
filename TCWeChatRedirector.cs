@@ -54,6 +54,25 @@ internal sealed class Target
     public string File;
 }
 
+internal static class TcSettings
+{
+    public static string GetTcPath()
+    {
+        string config = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tc-path.txt");
+        if (File.Exists(config))
+        {
+            string path = File.ReadAllText(config, Encoding.UTF8).Trim();
+            if (path.Length > 0)
+            {
+                if (!RedirectorContext.IsLocalPath(path))
+                    throw new InvalidDataException("tc-path.txt 中的 Total Commander 路径必须是绝对路径。");
+                return path;
+            }
+        }
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TotalCMD64", "TotalCMD64.exe");
+    }
+}
+
 internal sealed class RedirectorContext : ApplicationContext
 {
     private readonly string tcPath;
@@ -80,7 +99,7 @@ internal sealed class RedirectorContext : ApplicationContext
         string exeDir = AppDomain.CurrentDomain.BaseDirectory;
         logPath = Path.Combine(exeDir, "explorer-redirect-log.txt");
         stopName = @"Local\TCWeChatRedirector-Stop-" + WindowsIdentity.GetCurrent().User.Value;
-        tcPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TotalCMD64", "TotalCMD64.exe");
+        tcPath = TcSettings.GetTcPath();
         if (!File.Exists(tcPath)) throw new FileNotFoundException("未找到 Total Commander。", tcPath);
 
         dispatcher = new Control();
@@ -309,7 +328,7 @@ internal sealed class RedirectorContext : ApplicationContext
         return null;
     }
 
-    private static bool IsLocalPath(string path)
+    internal static bool IsLocalPath(string path)
     {
         if (string.IsNullOrEmpty(path)) return false;
         return (path.Length >= 3 && char.IsLetter(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/'))
@@ -437,17 +456,11 @@ internal static class Program
 
     private static bool SelfTest()
     {
-        bool ok = true;
-        Func<string, bool> local = delegate(string p)
-        {
-            if (string.IsNullOrEmpty(p)) return false;
-            return (p.Length >= 3 && char.IsLetter(p[0]) && p[1] == ':' && (p[2] == '\\' || p[2] == '/')) || p.StartsWith(@"\\", StringComparison.Ordinal);
-        };
-        if (!local(@"C:\Windows")) ok = false;
-        if (!local(@"\\server\share")) ok = false;
-        if (local(@"shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")) ok = false;
-        if (local("")) ok = false;
-        return ok;
+        return RedirectorContext.IsLocalPath(@"C:\Windows")
+            && RedirectorContext.IsLocalPath(@"\\server\share")
+            && !RedirectorContext.IsLocalPath(@"C:relative")
+            && !RedirectorContext.IsLocalPath(@"shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+            && !RedirectorContext.IsLocalPath("");
     }
 
     [STAThread]
@@ -462,7 +475,7 @@ internal static class Program
 
         if (mode == "--selftest")
         {
-            bool ok = SelfTest() && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TotalCMD64", "TotalCMD64.exe"));
+            bool ok = SelfTest() && File.Exists(TcSettings.GetTcPath());
             WriteStatus("redirector-selftest.txt", ok ? "PASS" : "FAIL");
             return ok ? 0 : 1;
         }

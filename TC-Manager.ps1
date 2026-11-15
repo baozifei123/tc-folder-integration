@@ -47,7 +47,7 @@ try {
     $haveMutex = $mutex.WaitOne(0)
     if (-not $haveMutex) { throw '另一个安装或还原窗口正在运行。' }
 
-    $tc = Join-Path $env:LOCALAPPDATA 'TotalCMD64\TotalCMD64.exe'
+    $tc = Get-TCTargetPath $PSScriptRoot
     $evExe = Join-Path $env:ProgramFiles 'Everything\Everything.exe'
     $evIni = Join-Path $env:APPDATA 'Everything\Everything.ini'
     $backupRoot = Join-Path $PSScriptRoot 'backup'

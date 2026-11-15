@@ -1,6 +1,19 @@
 ﻿# Helpers for Total Commander folder integration. No work is performed when sourced.
 Set-StrictMode -Version 2.0
 
+function Get-TCTargetPath {
+    param([string]$Directory)
+    $default = Join-Path $env:LOCALAPPDATA 'TotalCMD64\TotalCMD64.exe'
+    $config = Join-Path $Directory 'tc-path.txt'
+    if (-not (Test-Path -LiteralPath $config -PathType Leaf)) { return $default }
+    $path = [System.IO.File]::ReadAllText($config, [System.Text.Encoding]::UTF8).Trim()
+    if (-not $path) { return $default }
+    if ($path -notmatch '^(?:[a-zA-Z]:[\\/]|\\\\)') {
+        throw 'The Total Commander path in tc-path.txt must be absolute.'
+    }
+    return $path
+}
+
 function Get-TCRegistryValue {
     param([Microsoft.Win32.RegistryKey]$Root, [string]$Path, [AllowEmptyString()][string]$Name)
     $key = $Root.OpenSubKey($Path, $false)
