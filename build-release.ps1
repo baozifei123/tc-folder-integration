@@ -53,6 +53,6 @@ if ($child.ExitCode -ne 0) {
 }
 $hash = (Get-FileHash -LiteralPath $executable -Algorithm SHA256).Hash.ToLowerInvariant()
 $checksum = Join-Path $destination 'SHA256SUMS.txt'
-[System.IO.File]::WriteAllText($checksum, ($hash + '  ' + (Split-Path -Leaf $executable) + "`r`n"), [System.Text.Encoding]::ASCII)
+[System.IO.File]::WriteAllText($checksum, ($hash + '  ' + (Split-Path -Leaf $executable) + "`n"), [System.Text.Encoding]::ASCII)
 Write-Host ('PASS: built and tested ' + $executable)
 Write-Host ('SHA-256: ' + $hash)
